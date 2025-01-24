@@ -13,25 +13,30 @@ jobs:
       # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure the full history is fetched
 
       # Step 2: Install GitHub CLI
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
 
-      # Step 3: Create a new branch
+      # Step 3: Pull latest changes from the remote branch
+      - name: Pull latest changes
+        run: git pull origin main
+
+      # Step 4: Create a new branch
       - name: Create a new branch
         run: |
           git checkout -b new-feature-branch
           git push origin new-feature-branch
 
-      # Step 4: Create a pull request
+      # Step 5: Create a pull request
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }} # Use the GitHub-provided token
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create \
             --title "Auto-created Pull Request" \
             --body "This PR was automatically created after a push to main." \
             --base main \
             --head new-feature-branch
-# Testing
