@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository
+      # Step 1: Check out the current repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
@@ -22,22 +22,27 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
-      # Step 3: Create and commit a new Python file
-      - name: Add a new Python file
+      # Step 3: Clone the public repository and copy README.md
+      - name: Clone public repository
+        run: |
+          git clone --depth 1 https://github.com/matejnovak29/testingrepository2.git
+          cp testingrepository2/README.md .
+
+      # Step 4: Create and commit README.md
+      - name: Commit README.md
         run: |
           git checkout -b new-feature-branch
-          echo 'print("Hello World!")' > hello_world.py
-          git add hello_world.py
-          git commit -m "Add hello_world.py"
+          git add README.md
+          git commit -m "Add README.md from testingrepository2"
           git push origin new-feature-branch
 
-      # Step 4: Create a pull request using GH_PAT
+      # Step 5: Create a pull request using GH_PAT
       - name: Create Pull Request
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}  # Use Personal Access Token (GH_PAT)
         run: |
           gh pr create \
-            --title "Auto-created Pull Request" \
-            --body "This PR was automatically created after a push to main and adds hello_world.py." \
+            --title "Add README.md from testingrepository2" \
+            --body "This PR adds the README.md file from testingrepository2." \
             --base main \
             --head new-feature-branch
