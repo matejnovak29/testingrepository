@@ -14,28 +14,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up the GitHub CLI (gh)
+      # Step 2: Install GitHub CLI
       - name: Install GitHub CLI
         run: sudo apt-get install -y gh
 
-      # Step 3: Authenticate with GitHub CLI and clear token
-      - name: Authenticate GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}  # Use your PAT from secrets
-        run: |
-          echo "${GH_TOKEN}" | gh auth login --with-token
-          unset GH_TOKEN  # Clear the environment variable to allow credential caching
-
-      # Step 4: Create a new branch
+      # Step 3: Create a new branch
       - name: Create a new branch
         run: |
           git checkout -b new-feature-branch
           git push origin new-feature-branch
 
-      # Step 5: Create a pull request
+      # Step 4: Create a pull request
       - name: Create Pull Request
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub-provided token
         run: |
           gh pr create \
             --title "Auto-created Pull Request" \
