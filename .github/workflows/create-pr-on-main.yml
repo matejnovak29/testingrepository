@@ -27,7 +27,7 @@ jobs:
       # Step 4: Create a pull request
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Use the GitHub-provided token
+          GH_TOKEN: ${{ secrets.GH_PAT }} # Use the GitHub-provided token
         run: |
           gh pr create \
             --title "Auto-created Pull Request" \
