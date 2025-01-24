@@ -16,15 +16,13 @@ jobs:
         with:
           fetch-depth: 0  # Ensure the full history is fetched
 
-      # Step 2: Install GitHub CLI
-      - name: Install GitHub CLI
-        run: sudo apt-get install -y gh
+      # Step 2: Set up Git user identity
+      - name: Configure Git user
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
 
-      # Step 3: Pull latest changes from the remote branch
-      - name: Pull latest changes
-        run: git pull origin main
-
-      # Step 4: Create and commit a new Python file
+      # Step 3: Create and commit a new Python file
       - name: Add a new Python file
         run: |
           git checkout -b new-feature-branch
@@ -33,10 +31,10 @@ jobs:
           git commit -m "Add hello_world.py"
           git push origin new-feature-branch
 
-      # Step 5: Create a pull request
+      # Step 4: Create a pull request using GH_PAT
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}  # Use Personal Access Token (GH_PAT)
         run: |
           gh pr create \
             --title "Auto-created Pull Request" \
