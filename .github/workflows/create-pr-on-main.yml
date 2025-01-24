@@ -24,10 +24,13 @@ jobs:
       - name: Pull latest changes
         run: git pull origin main
 
-      # Step 4: Create a new branch
-      - name: Create a new branch
+      # Step 4: Create and commit a new Python file
+      - name: Add a new Python file
         run: |
           git checkout -b new-feature-branch
+          echo 'print("Hello World!")' > hello_world.py
+          git add hello_world.py
+          git commit -m "Add hello_world.py"
           git push origin new-feature-branch
 
       # Step 5: Create a pull request
@@ -37,6 +40,6 @@ jobs:
         run: |
           gh pr create \
             --title "Auto-created Pull Request" \
-            --body "This PR was automatically created after a push to main." \
+            --body "This PR was automatically created after a push to main and adds hello_world.py." \
             --base main \
             --head new-feature-branch
