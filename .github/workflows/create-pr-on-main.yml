@@ -1,4 +1,4 @@
-name: Create PR on Push to Main
+name: Clone and Run Python Script with Secret
 
 on:
   push:
@@ -6,44 +6,24 @@ on:
       - main
 
 jobs:
-  create-pr:
+  run-script:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the current repository
+      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Ensure the full history is fetched
 
-      # Step 2: Set up Git user identity
-      - name: Configure Git user
-        run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-
-      # Step 3: Clone the public repository and copy README.md
+      # Step 2: Clone the public repository and copy print.py
       - name: Clone public repository
         run: |
           git clone --depth 1 https://github.com/matejnovak29/testingrepository2.git
-          cp testingrepository2/README.md .
+          cp testingrepository2/print.py .
 
-      # Step 4: Create and commit README.md
-      - name: Commit README.md
-        run: |
-          git checkout -b new-feature-branch
-          git add README.md
-          git commit -m "Add README.md from testingrepository2"
-          git push origin new-feature-branch
-
-      # Step 5: Create a pull request using GH_PAT
-      - name: Create Pull Request
+      # Step 3: Run the Python script with the secret
+      - name: Run Python script
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}  # Use Personal Access Token (GH_PAT)
-        run: |
-          gh pr create \
-            --title "Add README.md from testingrepository2" \
-            --body "This PR adds the README.md file from testingrepository2." \
-            --base main \
-            --head new-feature-branch
-#Testing
+          TEST_VALUE: ${{ secrets.TEST_VALUE }}  # Pass the secret as an environment variable
+        run: python print.py
