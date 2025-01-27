@@ -27,23 +27,9 @@ jobs:
           terraform init
           terraform apply -auto-approve
           
-      - name: Print Outputs
-        run: |
-          # terraform output dbt_cloud_job_id 2>/dev/null
-          # terraform output dbt_cloud_job_id
-          terraform output dbt_cloud_job_id | sed -n '2p'
-          # terraform output -raw dbt_cloud_job_id | sed -n '2p'
-          # terraform output -raw dbt_cloud_job_id
-          
       - name: Get Outputs
         run: |
-          # Capture the output and remove quotes
-          DBT_JOB_ID=$(terraform output dbt_cloud_job_id | sed -n '2p')
-          #echo "Dbt job ID extracted: $DBT_JOB_ID"
-          #DBT_JOB_ID=$(printf "%s" "$DBT_JOB_ID")
-          #echo "Dbt job ID without whitespace: $DBT_JOB_ID"
-          #DBT_JOB_ID=$(echo "$DBT_JOB_ID" | xargs)
-          #echo "Dbt job ID without xargs: $DBT_JOB_ID"
+          DBT_JOB_ID=$(terraform output dbt_cloud_job_id | sed -n '2p' | tr -d '"')
           echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
 
       - name: Replace Job ID in Template
