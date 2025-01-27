@@ -27,21 +27,17 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      # Step 4: Extract Job ID
-      - name: Extract Job ID
-        id: extract_job_id
+      # Step 4: Get Outputs
+      - name: Get Outputs
         run: |
-          job_id=$(terraform output -raw dbt_cloud_job_id)
-          echo "Extracted Job ID: $job_id"
-          echo "job_id=$job_id" >> $GITHUB_ENV
-        shell: bash
+          echo "DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id)" >> $GITHUB_ENV
 
       # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
         run: |
-          sed -i "s/DAG/$job_id/g" templates/airflow_dag.py
+          sed -i "s/DAG/$DBT_JOB_ID/g" templates/airflow_dag.py
         env:
-          job_id: ${{ env.job_id }}
+          DBT_JOB_ID: ${{ env.DBT_JOB_ID }}
 
       # Step 6: Clone Client Repo (Repo B)
       - name: Clone Client Repo (Repo B)
