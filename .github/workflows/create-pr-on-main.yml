@@ -31,6 +31,7 @@ jobs:
         run: |
           # Capture the output and remove quotes
           DBT_JOB_ID=$(terraform output dbt_cloud_job_id | tr -d '"')
+          DBT_JOB_ID=$(printf "%s" "$DBT_JOB_ID")
           echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
 
       - name: Print DBT Job ID
