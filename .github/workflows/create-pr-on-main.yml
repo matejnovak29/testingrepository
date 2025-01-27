@@ -29,11 +29,11 @@ jobs:
           
       - name: Print Outputs
         run: |
-          terraform output dbt_cloud_job_id 2>/dev/null
-          terraform output dbt_cloud_job_id
+          # terraform output dbt_cloud_job_id 2>/dev/null
+          # terraform output dbt_cloud_job_id
           terraform output dbt_cloud_job_id | sed -n '2p'
-          terraform output -raw dbt_cloud_job_id | sed -n '2p'
-          terraform output -raw dbt_cloud_job_id
+          # terraform output -raw dbt_cloud_job_id | sed -n '2p'
+          # terraform output -raw dbt_cloud_job_id
           
       - name: Get Outputs
         run: |
