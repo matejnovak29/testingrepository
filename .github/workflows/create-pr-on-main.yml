@@ -34,7 +34,7 @@ jobs:
           cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
           cd client-repo
           git checkout -b feature/airflow-dag-template
-          git add airflow_dags/airflow_dag.py
+          git add templates/airflow_dag.py
           git commit -m "Add Airflow DAG Template"
           git push origin feature/airflow-dag-template
 
