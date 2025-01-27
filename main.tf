@@ -24,7 +24,7 @@ resource "dbtcloud_environment" "dbt_environment" {
   name        = "Development Environment"
   type        = "development" # Development environment
   project_id  = dbtcloud_project.dbt_project.id
-  dbt_version = "1.4.0"
+  dbt_version = "latest"
 }
 
 # Define a simple dbt Cloud Job
