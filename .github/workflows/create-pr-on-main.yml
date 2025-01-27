@@ -29,21 +29,13 @@ jobs:
 
       - name: Get Outputs
         run: |
-          echo "Checking working directory..."
-          pwd  # Prints the current working directory for debugging
-          ls -la  # Lists all files to verify the presence of terraform.tfstate
-          DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id 2>/dev/null)
+          # Capture the output and filter only the value
+          DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id 2>/dev/null | sed -e 's/[[:cntrl:]]//g')
           echo "Extracted DBT Job ID: $DBT_JOB_ID"
+      
+          # Save the clean output to the GitHub Actions environment file
           echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
         shell: bash
-
-      # Step 4: Get Outputs
-      - name: Get Outputs
-        id: get_outputs
-        run: |
-          DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id)
-          echo "Extracted DBT Job ID: $DBT_JOB_ID"
-          echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
 
       # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
