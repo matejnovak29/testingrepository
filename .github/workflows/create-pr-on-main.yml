@@ -26,6 +26,10 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
+          
+      - name: Debug Terraform Output
+        run: |
+          terraform output -raw dbt_cloud_job_id
 
       # Step 4: Get Outputs
       - name: Get Outputs
