@@ -36,12 +36,14 @@ resource "dbtcloud_job" "example_job" {
   ]
 
   # Schedule trigger
-  triggers {
-    schedule {
-      cron      = "0 12 * * *" # Daily at 12:00 UTC
-      timezone  = "UTC"
+  triggers = [
+    {
+      type      = "schedule"       # Type of trigger
+      cron      = "0 12 * * *"     # Cron expression for daily runs at 12:00 UTC
+      timezone  = "UTC"            # Timezone for the cron schedule
+      schedule  = true             # Schedule trigger must be explicitly enabled
     }
-  }
+  ]
 }
 
 output "dbt_cloud_job_id" {
