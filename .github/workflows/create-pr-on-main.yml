@@ -35,10 +35,16 @@ jobs:
           DBT_JOB_ID=$(echo "$DBT_JOB_ID" | xargs)
           echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
 
-      # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
         run: |
-          sed -i "s/DAG/$DBT_JOB_ID/g" templates/airflow_dag.py
+          # Escape special characters in DBT_JOB_ID for sed
+          ESCAPED_JOB_ID=$(printf '%s\n' "$DBT_JOB_ID" | sed 's/[\/&]/\\&/g')
+      
+          # Replace DAG with the escaped Job ID in the template
+          sed -i "s/DAG/$ESCAPED_JOB_ID/g" templates/airflow_dag.py
+      
+          # Debugging: Print to confirm replacement
+          echo "Replaced DAG with $ESCAPED_JOB_ID in the template."
         env:
           DBT_JOB_ID: ${{ env.DBT_JOB_ID }}
 
