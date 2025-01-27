@@ -26,24 +26,29 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve
-      # Step 4: Extract Job ID from Terraform Output
+
+      # Step 4: Extract Job ID
       - name: Extract Job ID
         id: extract_job_id
         run: |
           job_id=$(terraform output -raw dbt_cloud_job_id)
           echo "Extracted Job ID: $job_id"
-          echo "::set-output name=job_id::$job_id"
+          echo "job_id=$job_id" >> $GITHUB_ENV
+
       # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
         run: |
-          job_id=${{ steps.extract_job_id.outputs.job_id }}
           sed -i "s/DAG/$job_id/g" templates/airflow_dag.py
+        env:
+          job_id: ${{ env.job_id }}
+
       # Step 6: Clone Client Repo (Repo B)
       - name: Clone Client Repo (Repo B)
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository2.git client-repo
+
       # Step 7: Copy Template to Client Repo
       - name: Copy Template
         run: |
@@ -51,6 +56,7 @@ jobs:
             mkdir -p client-repo/airflow_dbt_cloud_dags
           fi
           cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
+
       # Step 8: Commit and Push Changes
       - name: Commit and Push Changes
         run: |
@@ -59,6 +65,7 @@ jobs:
           git add airflow_dbt_cloud_dags/airflow_dag.py
           git commit -m "Add Airflow DAG Template with Job ID"
           git push origin feature/airflow-dag-template
+
       # Step 9: Create Pull Request
       - name: Create Pull Request
         env:
