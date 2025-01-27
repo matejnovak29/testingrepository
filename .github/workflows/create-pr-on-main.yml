@@ -1,4 +1,4 @@
-name: Push Template via Pull Request
+name: Create PR to another repo
 
 on:
   workflow_dispatch:  # Spustit CI/CD manuálně
@@ -23,7 +23,7 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git clone https://${GH_PAT}@github.com/client/repo-b.git client-repo
+          git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository.git client-repo
 
       # Step 4: Copy Airflow DAG Template to Repo B
       - name: Copy Template
