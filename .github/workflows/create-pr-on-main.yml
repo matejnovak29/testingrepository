@@ -1,40 +1,72 @@
-provider "dbtcloud" {
-  api_token  = var.dbt_cloud_api_token
-  account_id = var.dbt_cloud_account_id
-  host_url   = "https://cloud.getdbt.com/api"
-}
+name: Create PR in Client's Repo with Terraform Setup
 
-resource "dbtcloud_project" "example_project" {
-  name        = "My Terraform Project"
-  description = "Project created via Terraform"
-}
+on:
+  workflow_dispatch:  # Manual trigger
 
-resource "dbtcloud_environment" "example_environment" {
-  name        = "Production"
-  type        = "deployment" # Can also be "development" based on your need
-  project_id  = dbtcloud_project.example_project.id
-  dbt_version = "1.4.0"
-}
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
 
-resource "dbtcloud_job" "example_job" {
-  name         = "Example Job"
-  project_id   = dbtcloud_project.example_project.id
-  environment_id = dbtcloud_environment.example_environment.id # Link to the environment
-  dbt_version  = "1.4.0"
-  execute_steps = [
-    "dbt run",
-    "dbt test"
-  ]
+    steps:
+      # Step 1: Check out your repository (Repo A)
+      - name: Checkout Repo A
+        uses: actions/checkout@v3
 
-  # Schedule trigger
-  triggers {
-    schedule {
-      cron      = "0 12 * * *" # Daily at 12:00 UTC
-      timezone  = "UTC"
-    }
-  }
-}
+      # Step 2: Set up Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: "1.3.0"
 
-output "dbt_cloud_job_id" {
-  value = dbtcloud_job.example_job.id
-}
+      # Step 3: Terraform Init and Apply
+      - name: Initialize and Apply Terraform
+        env:
+          TF_VAR_dbt_cloud_api_token: ${{ secrets.DBT_CLOUD_API_TOKEN }}
+          TF_VAR_dbt_cloud_account_id: "15960"
+        run: |
+          terraform init
+          terraform apply -auto-approve
+      # Step 4: Extract Job ID from Terraform Output
+      - name: Extract Job ID
+        id: extract_job_id
+        run: |
+          job_id=$(terraform output -raw dbt_cloud_job_id)
+          echo "Extracted Job ID: $job_id"
+          echo "::set-output name=job_id::$job_id"
+      # Step 5: Replace Job ID in Template
+      - name: Replace Job ID in Template
+        run: |
+          job_id=${{ steps.extract_job_id.outputs.job_id }}
+          sed -i "s/DAG/$job_id/g" templates/airflow_dag.py
+      # Step 6: Clone Client Repo (Repo B)
+      - name: Clone Client Repo (Repo B)
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository2.git client-repo
+      # Step 7: Copy Template to Client Repo
+      - name: Copy Template
+        run: |
+          if [ ! -d "client-repo/airflow_dbt_cloud_dags" ]; then
+            mkdir -p client-repo/airflow_dbt_cloud_dags
+          fi
+          cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
+      # Step 8: Commit and Push Changes
+      - name: Commit and Push Changes
+        run: |
+          cd client-repo
+          git checkout -b feature/airflow-dag-template
+          git add airflow_dbt_cloud_dags/airflow_dag.py
+          git commit -m "Add Airflow DAG Template with Job ID"
+          git push origin feature/airflow-dag-template
+      # Step 9: Create Pull Request
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh pr create \
+            --repo matejnovak29/testingrepository2 \
+            --title "Add Airflow DAG Template with Job ID" \
+            --body "This PR adds the Airflow DAG Template with the dynamically generated Job ID from Terraform." \
+            --base main \
+            --head feature/airflow-dag-template
