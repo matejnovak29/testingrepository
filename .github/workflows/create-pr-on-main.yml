@@ -52,7 +52,7 @@ jobs:
         run: |
           cd client-repo
           git checkout -b feature/airflow-dag-template
-          sed -i "s/DAG/$DBT_JOB_ID/g" templates/airflow_dag.py
+          sed -i "s/DAG/$DBT_JOB_ID/g" airflow_dbt_cloud_dags/airflow_dag.py
           git add airflow_dbt_cloud_dags/airflow_dag.py
           git commit -m "Add Airflow DAG Template with Job ID"
           git push origin feature/airflow-dag-template
