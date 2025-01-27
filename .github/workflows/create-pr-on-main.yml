@@ -29,12 +29,17 @@ jobs:
 
       - name: Get Outputs
         run: |
-          # Capture the output and filter only the value
-          DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id 2>/dev/null | sed -e 's/[[:cntrl:]]//g')
+          # Suppress debug logs and capture only the raw output
+          DBT_JOB_ID=$(terraform output -raw dbt_cloud_job_id 2>&1 | grep -oE '^[0-9]+$')
           echo "Extracted DBT Job ID: $DBT_JOB_ID"
-      
+          
           # Save the clean output to the GitHub Actions environment file
-          echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
+          if [ -n "$DBT_JOB_ID" ]; then
+            echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
+          else
+            echo "Failed to extract DBT Job ID." >&2
+            exit 1
+          fi
         shell: bash
 
       # Step 5: Replace Job ID in Template
