@@ -8,23 +8,26 @@ terraform {
 }
 
 provider "dbtcloud" {
-  token  = var.dbt_cloud_api_token
+  api_token  = var.dbt_cloud_api_token
   account_id = var.dbt_cloud_account_id
   host_url   = "https://cloud.getdbt.com/api"
 }
 
-resource "dbtcloud_project" "example_project" {
+# Define the dbt Cloud Project
+resource "dbtcloud_project" "dbt_project" {
   name        = "My Terraform Project"
-  description = "Project created via Terraform"
+  description = "A simple dbt project created via Terraform"
 }
 
-resource "dbtcloud_environment" "example_environment" {
-  name        = "Production"
-  type        = "deployment" # Can also be "development" based on your need
-  project_id  = dbtcloud_project.example_project.id
+# Define the dbt Cloud Environment
+resource "dbtcloud_environment" "dbt_environment" {
+  name        = "Development Environment"
+  type        = "development" # Development environment
+  project_id  = dbtcloud_project.dbt_project.id
   dbt_version = "1.4.0"
 }
 
+# Define a simple dbt Cloud Job
 resource "dbtcloud_job" "simple_job" {
   name           = "Simple Job"
   project_id     = dbtcloud_project.dbt_project.id
