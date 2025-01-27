@@ -8,7 +8,7 @@ terraform {
 }
 
 provider "dbtcloud" {
-  api_token  = var.dbt_cloud_api_token
+  token  = var.dbt_cloud_api_token
   account_id = var.dbt_cloud_account_id
   host_url   = "https://cloud.getdbt.com/api"
 }
