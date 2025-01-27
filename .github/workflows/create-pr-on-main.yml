@@ -56,7 +56,7 @@ jobs:
       # Step 6: Create Pull Request in Client Repo
       - name: Create Pull Request in Client Repo
         env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}  # Map your GH_PAT token to GH_TOKEN
         run: |
           gh pr create \
             --repo matejnovak29/testingrepository2 \
