@@ -25,6 +25,7 @@ jobs:
         run: |
           terraform init
           terraform apply -auto-approve | tee tf_output.log
+          tail -n 50 tf_output.log
 
       # Step 4: Extract Job ID from Terraform Output
       - name: Extract Job ID
