@@ -1,7 +1,7 @@
 name: Create PR to another repo
 
 on:
-  workflow_dispatch:  # Spustit CI/CD manuálně
+  workflow_dispatch:  # Trigger manually
 
 jobs:
   create-pr:
@@ -28,17 +28,32 @@ jobs:
       # Step 4: Copy Airflow DAG Template to Repo B
       - name: Copy Template
         run: |
+          # Ensure the target directory exists
           if [ ! -d "client-repo/airflow_dbt_cloud_dags" ]; then
             mkdir -p client-repo/airflow_dbt_cloud_dags
           fi
+
+          # Copy the template into the directory
           cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
+
+      # Step 5: Commit and push changes to a new branch
+      - name: Commit and Push Changes
+        run: |
           cd client-repo
+
+          # Create and switch to a new branch
           git checkout -b feature/airflow-dag-template
-          git add templates/airflow_dag.py
+
+          # Add the file to Git
+          git add airflow_dbt_cloud_dags/airflow_dag.py
+
+          # Commit changes
           git commit -m "Add Airflow DAG Template"
+
+          # Push the branch
           git push origin feature/airflow-dag-template
 
-      # Step 5: Create Pull Request
+      # Step 6: Create Pull Request
       - name: Create Pull Request
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
