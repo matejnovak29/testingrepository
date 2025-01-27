@@ -22,20 +22,20 @@ jobs:
       - name: Initialize and Apply Terraform
         env:
           TF_VAR_dbt_cloud_api_token: ${{ secrets.DBT_CLOUD_API_TOKEN }}
+          TF_VAR_dbt_cloud_account_id: "15960"
         run: |
           terraform init
-          terraform apply -auto-approve | tee tf_output.log
-          tail -n 50 tf_output.log
+          terraform apply -auto-approve
 
       # Step 4: Extract Job ID from Terraform Output
       - name: Extract Job ID
         id: extract_job_id
         run: |
           job_id=$(terraform output -raw dbt_cloud_job_id)
-          echo "Job ID: $job_id"
+          echo "Extracted Job ID: $job_id"
           echo "::set-output name=job_id::$job_id"
 
-      # Step 5: Replace "DAG" with Job ID in the Airflow DAG Template
+      # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
         run: |
           job_id=${{ steps.extract_job_id.outputs.job_id }}
@@ -48,38 +48,27 @@ jobs:
         run: |
           git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository2.git client-repo
 
-      # Step 7: Copy Airflow DAG Template to Client Repo
-      - name: Copy Template to Client Repo
+      # Step 7: Copy Template to Client Repo
+      - name: Copy Template
         run: |
-          # Ensure the target directory exists
           if [ ! -d "client-repo/airflow_dbt_cloud_dags" ]; then
             mkdir -p client-repo/airflow_dbt_cloud_dags
           fi
-
-          # Copy the updated template to the target directory
           cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
 
-      # Step 8: Commit and Push Changes to a New Branch in Client Repo
-      - name: Commit and Push Changes to Client Repo
+      # Step 8: Commit and Push Changes
+      - name: Commit and Push Changes
         run: |
           cd client-repo
-
-          # Create and switch to a new branch
           git checkout -b feature/airflow-dag-template
-
-          # Add the copied file
           git add airflow_dbt_cloud_dags/airflow_dag.py
-
-          # Commit changes
           git commit -m "Add Airflow DAG Template with Job ID"
-
-          # Push the new branch to the client repository
           git push origin feature/airflow-dag-template
 
-      # Step 9: Create Pull Request in Client Repo
-      - name: Create Pull Request in Client Repo
+      # Step 9: Create Pull Request
+      - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}  # Map your GH_PAT token to GH_TOKEN
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           gh pr create \
             --repo matejnovak29/testingrepository2 \
