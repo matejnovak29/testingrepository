@@ -1,7 +1,7 @@
-name: Create PR to another repo
+name: Create PR in Client's Repo
 
 on:
-  workflow_dispatch:  # Trigger manually
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   create-pr:
@@ -23,42 +23,43 @@ jobs:
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository.git client-repo
+          git clone https://${GH_PAT}@github.com/matejnovak29/testingrepository2.git client-repo
 
-      # Step 4: Copy Airflow DAG Template to Repo B
-      - name: Copy Template
+      # Step 4: Copy Airflow DAG Template to Client Repo
+      - name: Copy Template to Client Repo
         run: |
           # Ensure the target directory exists
           if [ ! -d "client-repo/airflow_dbt_cloud_dags" ]; then
             mkdir -p client-repo/airflow_dbt_cloud_dags
           fi
 
-          # Copy the template into the directory
+          # Copy the template to the target directory
           cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
 
-      # Step 5: Commit and push changes to a new branch
-      - name: Commit and Push Changes
+      # Step 5: Commit and Push Changes to a New Branch in Client Repo
+      - name: Commit and Push Changes to Client Repo
         run: |
           cd client-repo
 
           # Create and switch to a new branch
           git checkout -b feature/airflow-dag-template
 
-          # Add the file to Git
+          # Add the copied file
           git add airflow_dbt_cloud_dags/airflow_dag.py
 
           # Commit changes
           git commit -m "Add Airflow DAG Template"
 
-          # Push the branch
+          # Push the new branch to the client repository
           git push origin feature/airflow-dag-template
 
-      # Step 6: Create Pull Request
-      - name: Create Pull Request
+      # Step 6: Create Pull Request in Client Repo
+      - name: Create Pull Request in Client Repo
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           gh pr create \
+            --repo matejnovak29/testingrepository2 \
             --title "Add Airflow DAG Template" \
             --body "This PR adds the Airflow DAG Template from Repo A." \
             --base main \
