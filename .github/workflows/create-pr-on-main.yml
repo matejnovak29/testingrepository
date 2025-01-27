@@ -1,54 +1,47 @@
-name: Clone, Run Script, and Create PR
+name: Push Template via Pull Request
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:  # Spustit CI/CD manuálně
 
 jobs:
   create-pr:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the current repository
-      - name: Checkout repository
+      # Step 1: Check out your repository (Repo A)
+      - name: Checkout Repo A
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Ensure the full history is fetched
 
-      # Step 2: Set up Git user identity
-      - name: Configure Git user
+      # Step 2: Configure Git
+      - name: Configure Git User
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
-      # Step 3: Clone the public repository and copy print.py
-      - name: Clone public repository and copy script
-        run: |
-          git clone --depth 1 https://github.com/matejnovak29/testingrepository2.git
-          cp testingrepository2/print.py .
-
-      # Step 4: Run the Python script with the secret value
-      - name: Run Python script
+      # Step 3: Clone Client Repo (Repo B)
+      - name: Clone Client Repo (Repo B)
         env:
-          TEST_VALUE: ${{ secrets.TEST_VALUE }}  # Inject secret value
-        run: python print.py
-
-      # Step 5: Commit print.py to a new branch
-      - name: Commit cloned file to a new branch
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          git checkout -b new-feature-branch
-          git add print.py
-          git commit -m "Add print.py from testingrepository2"
-          git push origin new-feature-branch
+          git clone https://${GH_PAT}@github.com/client/repo-b.git client-repo
 
-      # Step 6: Create a pull request using GH_PAT
+      # Step 4: Copy Airflow DAG Template to Repo B
+      - name: Copy Template
+        run: |
+          cp templates/airflow_dag.py client-repo/airflow_dags/
+          cd client-repo
+          git checkout -b feature/airflow-dag-template
+          git add airflow_dags/airflow_dag.py
+          git commit -m "Add Airflow DAG Template"
+          git push origin feature/airflow-dag-template
+
+      # Step 5: Create Pull Request
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}  # Use Personal Access Token (GH_PAT)
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           gh pr create \
-            --title "Add print.py from testingrepository2" \
-            --body "This PR adds the print.py file from testingrepository2." \
+            --title "Add Airflow DAG Template" \
+            --body "This PR adds the Airflow DAG Template from Repo A." \
             --base main \
-            --head new-feature-branch
+            --head feature/airflow-dag-template
