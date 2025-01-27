@@ -28,4 +28,4 @@ jobs:
           terraform apply -auto-approve
 
       - name: Debug Terraform Outputs
-        run: terraform output -raw dbt_cloud_job_id
+        run: terraform output dbt_cloud_job_id | tr -d '"'
