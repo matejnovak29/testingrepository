@@ -25,27 +25,29 @@ resource "dbtcloud_environment" "example_environment" {
   dbt_version = "1.4.0"
 }
 
-resource "dbtcloud_job" "example_job" {
-  name         = "Example Job"
-  project_id   = dbtcloud_project.example_project.id
-  environment_id = dbtcloud_environment.example_environment.id # Link to the environment
-  dbt_version  = "1.4.0"
+resource "dbtcloud_job" "simple_job" {
+  name           = "Simple Job"
+  project_id     = dbtcloud_project.dbt_project.id
+  environment_id = dbtcloud_environment.dbt_environment.environment_id
+
+  # Steps to execute
   execute_steps = [
     "dbt run",
     "dbt test"
   ]
 
-  # Schedule trigger
-  triggers = [
-    {
-      type      = "schedule"       # Type of trigger
-      cron      = "0 12 * * *"     # Cron expression for daily runs at 12:00 UTC
-      timezone  = "UTC"            # Timezone for the cron schedule
-      schedule  = true             # Schedule trigger must be explicitly enabled
-    }
-  ]
+  triggers = {
+    "schedule" = true
+  }
+
+  # Schedule: Daily at 12:00 UTC
+  schedule_days = [0, 1, 2, 3, 4, 5, 6] # All days of the week
+  schedule_type = "days_of_week"
+  cron          = "0 12 * * *" # Daily at 12:00 UTC
+  timezone      = "UTC"
 }
 
+# Output the Job ID
 output "dbt_cloud_job_id" {
-  value = dbtcloud_job.example_job.id
+  value = dbtcloud_job.simple_job.id
 }
