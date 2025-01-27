@@ -34,6 +34,7 @@ jobs:
           job_id=$(terraform output -raw dbt_cloud_job_id)
           echo "Extracted Job ID: $job_id"
           echo "job_id=$job_id" >> $GITHUB_ENV
+        shell: bash
 
       # Step 5: Replace Job ID in Template
       - name: Replace Job ID in Template
