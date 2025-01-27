@@ -40,14 +40,11 @@ resource "dbtcloud_job" "simple_job" {
   ]
 
   triggers = {
-    "schedule" = true
+    "github_webhook" : true
+    "git_provider_webhook" : true
+    "schedule" : false
+    "on_merge" : false
   }
-
-  # Schedule: Daily at 12:00 UTC
-  schedule_days = [0, 1, 2, 3, 4, 5, 6] # All days of the week
-  schedule_type = "days_of_week"
-  cron          = "0 12 * * *" # Daily at 12:00 UTC
-  timezone      = "UTC"
 }
 
 # Output the Job ID
