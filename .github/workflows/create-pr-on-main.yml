@@ -28,7 +28,10 @@ jobs:
       # Step 4: Copy Airflow DAG Template to Repo B
       - name: Copy Template
         run: |
-          cp templates/airflow_dag.py client-repo/airflow_dags/
+          if [ ! -d "client-repo/airflow_dbt_cloud_dags" ]; then
+            mkdir -p client-repo/airflow_dbt_cloud_dags
+          fi
+          cp templates/airflow_dag.py client-repo/airflow_dbt_cloud_dags/
           cd client-repo
           git checkout -b feature/airflow-dag-template
           git add airflow_dags/airflow_dag.py
