@@ -29,12 +29,12 @@ jobs:
           
       - name: Print Outputs
         run: |
-          terraform output dbt_cloud_job_id | tr -d '"'
+          terraform output dbt_cloud_job_id
           
       - name: Get Outputs
         run: |
           # Capture the output and remove quotes
-          DBT_JOB_ID=$(terraform output dbt_cloud_job_id | tr -d '"')
+          DBT_JOB_ID=$(terraform output dbt_cloud_job_id)
           echo "DBT_JOB_ID=$DBT_JOB_ID" >> $GITHUB_ENV
 
       - name: Replace Job ID in Template
